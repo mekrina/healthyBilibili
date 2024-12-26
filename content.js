@@ -1,5 +1,4 @@
-const DEBUGMODE = true;
-chrome.storage.sync.set({'DEBUGMODE': DEBUGMODE})
+let DEBUGMODE = true;
 // 向页面插入输入框  
 function insertInputBox() {  
   const container = document.createElement("div");  
@@ -90,6 +89,10 @@ async function incremet() {
     await sendMessagePromise({ type: "incrementVideoCount" }).catch(console.error);
 }
 
+function trimEnd(str) {
+  return str.replace(/\/$/, "");
+}
+
 
 
 // 向 background.js 发送会话开始信号
@@ -117,11 +120,11 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
         if (DEBUGMODE){
           console.log("oh you are watching a video");
         }
-        let lastUrl = location.href.split("?")[0];
+        let lastUrl = trimEnd(location.href.split("?")[0]);
         incremet();
         new MutationObserver(() => {
           if (window.location.href.includes("video") || window.location.href.includes("bangumi/play")) {
-            let currentUrl = location.href.split("?")[0];
+            let currentUrl = trimEnd(location.href.split("?")[0]);
             if (currentUrl !== lastUrl) {
               if (DEBUGMODE){
                 console.log(`url changed to ${currentUrl}`);

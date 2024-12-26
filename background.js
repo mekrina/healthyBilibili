@@ -1,4 +1,4 @@
-DEBUGMODE = chrome.storage.sync.get(['DEBUGMODE']);
+DEBUGMODE = true;
 
 var maxVideoCount = -1; // 最大视频观看数
 var videoCount = 0;    // 当前观看视频数
