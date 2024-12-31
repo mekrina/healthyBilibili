@@ -1,10 +1,12 @@
 DEBUGMODE = true;
-
-var maxVideoCount = -1; // 最大视频观看数
+let maxVideoCount = -1; // 最大视频观看数
 var videoCount = 0;    // 当前观看视频数
 let sessionStart = null; // 当前会话的开始时间
 let hasTriggeredAlert = false; // 是否已触发30分钟提醒
 
+if (DEBUGMODE) {
+  console.log("background.js reloaded");
+}
 // 初始化监听器
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Bilibili Watch Control extension installed.");
@@ -45,9 +47,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 function checkVideoLimit() {
   if (videoCount > maxVideoCount) {
     console.log("正在重定向")
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.update(tabs[0].id, { url: "http://localhost/suggest.html" });
-    });
+    setTimeout(() => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.update(tabs[0].id, { url: "http://localhost/suggest.html" });
+      });
+    }, 1000);
   }
 }
 
