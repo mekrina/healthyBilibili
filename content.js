@@ -66,14 +66,15 @@ function sendMessagePromise(message) {
       });
   });
 }
-async function getMaxVideo() {
-  try {
-      const response = await sendMessagePromise({ type: "getMaxVideo" });
-      maxVideoCount = response.maxVideoCount;
-      videoCount = response.videoCount;
-  } catch (error) {
+function getMaxVideo() {  
+  sendMessagePromise({ type: "getMaxVideo" })
+    .then((response) => {  
+      maxVideoCount = response.maxVideoCount;  
+      videoCount = response.videoCount;  
+    })
+    .catch((error) => {  
       console.error(error);
-  }
+    });  
 }
 async function updateMaxVideoCountAndRedirect() {
   try {
@@ -103,7 +104,7 @@ if (DEBUGMODE){
 }
 
 if (window.location.href.indexOf("bilibili.com") > -1) {
-    async () => {
+    (async () => {
       await getMaxVideo();
       if (maxVideoCount === -1) {
           chrome.runtime.sendMessage({ type: "startSession" });
@@ -134,7 +135,7 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
           }
         }).observe(document, { subtree: true, childList: true });
       }
-    };
+    })();
 }
 else if (window.location.href.indexOf("http://localhost") > -1) {
   const links = document.querySelectorAll("a");

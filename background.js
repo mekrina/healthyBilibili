@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // 监听来自 content.js 的消息
-chrome.runtime.onMessage.addListener((message, sendResponse) => {
+chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
   if (message.type === "getMaxVideo") {
     sendResponse({ "maxVideoCount": maxVideoCount, "videoCount": videoCount });
   }
