@@ -1,3 +1,7 @@
-var string = "http://www.bilibili.com/video/kasdlfja"
-sub = string.split("?")[0]
-console.log(sub)
+sessionStart = Date.now();
+console.log(sessionStart)
+
+setTimeout(() => {
+    console.log(Date.now())
+}, 2000);
+

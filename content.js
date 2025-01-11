@@ -50,7 +50,6 @@ function insertInputBox() {
       }
     });  
   });  
-
   container.appendChild(label);  
   container.appendChild(input);  
   container.appendChild(button);  
@@ -89,7 +88,7 @@ async function incremet() {
     await sendMessagePromise({ type: "incrementVideoCount" }).catch(console.error);
 }
 
-function trimEnd(str) {
+async function trimEnd(str) {
   return str.replace(/\/$/, "");
 }
 
@@ -104,7 +103,7 @@ if (DEBUGMODE){
 }
 
 if (window.location.href.indexOf("bilibili.com") > -1) {
-    (async () => {
+    async () => {
       await getMaxVideo();
       if (maxVideoCount === -1) {
           chrome.runtime.sendMessage({ type: "startSession" });
@@ -135,9 +134,9 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
           }
         }).observe(document, { subtree: true, childList: true });
       }
-  })();
+    };
 }
-else if (window.location.href.indexOf("localhost") > -1) {
+else if (window.location.href.indexOf("http://localhost") > -1) {
   const links = document.querySelectorAll("a");
   links.forEach((link) => {
     if (link.href.includes("bilibili.com")) {
