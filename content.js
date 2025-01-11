@@ -66,8 +66,8 @@ function sendMessagePromise(message) {
       });
   });
 }
-function getMaxVideo() {  
-  sendMessagePromise({ type: "getMaxVideo" })
+async function getMaxVideo() {  
+    await sendMessagePromise({ type: "getMaxVideo" })
     .then((response) => {  
       maxVideoCount = response.maxVideoCount;  
       videoCount = response.videoCount;  
@@ -89,7 +89,7 @@ async function incremet() {
     await sendMessagePromise({ type: "incrementVideoCount" }).catch(console.error);
 }
 
-async function trimEnd(str) {
+function trimEnd(str) {
   return str.replace(/\/$/, "");
 }
 
@@ -107,11 +107,11 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
     (async () => {
       await getMaxVideo();
       if (maxVideoCount === -1) {
-          chrome.runtime.sendMessage({ type: "startSession" });
-          insertInputBox();
-          if (DEBUGMODE){
-            console.log("maxVideoCount = -1, please reset the maxVideoCount");
-          }
+        chrome.runtime.sendMessage({ type: "startSession" });
+        insertInputBox();
+        if (DEBUGMODE){
+          console.log("maxVideoCount = -1, please reset the maxVideoCount");
+        }
       }
       if (DEBUGMODE){
         console.log(location.href);
@@ -122,6 +122,15 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
         }
         let lastUrl = trimEnd(location.href.split("?")[0]);
         incremet();
+        const xpathExpression = '//*[@id="viewbox_report"]/div[1]/div/h1';
+        const result = document.evaluate(
+          xpathExpression,
+          document,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        );
+        const titleNode = result.singleNodeValue;
         new MutationObserver(() => {
           if (window.location.href.includes("video") || window.location.href.includes("bangumi/play")) {
             let currentUrl = trimEnd(location.href.split("?")[0]);
@@ -133,7 +142,7 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
               lastUrl = currentUrl;
             }
           }
-        }).observe(document, { subtree: true, childList: true });
+        }).observe(titleNode, { subtree: true, childList: true });
       }
     })();
 }
