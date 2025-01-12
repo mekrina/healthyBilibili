@@ -92,7 +92,17 @@ async function incremet() {
 function trimEnd(str) {
   return str.replace(/\/$/, "");
 }
-
+// function debounce(callback, delay) {
+//   let timeout;
+//   return function() {
+//     const context = this;
+//     const args = arguments;
+//     clearTimeout(timeout);
+//     timeout = setTimeout(() => {
+//       callback.apply(context, args);
+//     }, delay);
+//   };
+// }
 
 
 // 向 background.js 发送会话开始信号
@@ -122,15 +132,11 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
         }
         let lastUrl = trimEnd(location.href.split("?")[0]);
         incremet();
-        const xpathExpression = '//*[@id="viewbox_report"]/div[1]/div/h1';
-        const result = document.evaluate(
-          xpathExpression,
-          document,
-          null,
-          XPathResult.FIRST_ORDERED_NODE_TYPE,
-          null
-        );
-        const titleNode = result.singleNodeValue;
+        const likeNum = document.querySelector(".video-like-info.video-toolbar-item-text");
+        if(!(likeNum instanceof Node)){
+          console.error("likeNum not found");
+          return;
+        }
         new MutationObserver(() => {
           if (window.location.href.includes("video") || window.location.href.includes("bangumi/play")) {
             let currentUrl = trimEnd(location.href.split("?")[0]);
@@ -142,7 +148,7 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
               lastUrl = currentUrl;
             }
           }
-        }).observe(titleNode, { subtree: true, childList: true });
+        }).observe(likeNum, {childList: true, subtree: true});
       }
     })();
 }

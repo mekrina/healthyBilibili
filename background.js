@@ -44,8 +44,8 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
 function checkVideoLimit() {
   if (videoCount + 1 > maxVideoCount) {
     console.log("正在重定向")
-    setTimeout(() => {
-      chrome.tabs.query({active:true,currentWindow: true }, (tabs) => {
+    setTimeout( async () => {
+      let tabs = await chrome.tabs.query({active:true,currentWindow: true })
         if (tabs.length === 0) {
           // todo
           if (DEBUGMODE) {
@@ -53,8 +53,7 @@ function checkVideoLimit() {
           }
           return;
         }
-        chrome.tabs.update(tabs[0].id, { url: "http://localhost/suggest.html" });
-      });
+        chrome.tabs.update(tabs[0].id, { url: "http://localhost/suggest.html" });;
     }, 1000);
   }
 }
