@@ -36,8 +36,8 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
     if (DEBUGMODE) {
       console.log("maxVideoCount updated to " + maxVideoCount);
     }
-    sendResponse({ success: true });
   }
+  sendResponse({ success: true });
 });
 
 // 检查是否需要重定向

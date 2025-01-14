@@ -73,7 +73,7 @@ async function getMaxVideo() {
       videoCount = response.videoCount;  
     })
     .catch((error) => {  
-      console.error(error);
+      console.error("打印的错误,when getMaxVideo:" + error);
     });  
 }
 async function updateMaxVideoCountAndRedirect() {
@@ -81,12 +81,12 @@ async function updateMaxVideoCountAndRedirect() {
       await sendMessagePromise({ type: "updateMaxVideoCount", newMax: -1 });
       window.location.href = "https://www.bilibili.com";
   } catch (error) {
-      console.error(error);
+      console.error("打印的错误,when updateMaxVideoCountAndRedirect"+error);
   }
 }
-async function incremet() {
+async function increment() {
     console.log("videoCount++");
-    await sendMessagePromise({ type: "incrementVideoCount" }).catch(console.error);
+    await sendMessagePromise({ type: "incrementVideoCount" }).catch("打印的错误,when increment:"+console.error);
 }
 
 function trimEnd(str) {
@@ -131,10 +131,10 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
           console.log("oh you are watching a video");
         }
         let lastUrl = trimEnd(location.href.split("?")[0]);
-        incremet();
-        const likeNum = document.querySelector(".video-like-info.video-toolbar-item-text");
-        if(!(likeNum instanceof Node)){
-          console.error("likeNum not found");
+        increment();
+        const coinNum = document.querySelector(".video-coin-info.video-toolbar-item-text") || document.querySelectorAll(".info-text")[1];
+        if(!(coinNum instanceof Node)){
+          console.error("coinNum not found");
           return;
         }
         new MutationObserver(() => {
@@ -144,11 +144,11 @@ if (window.location.href.indexOf("bilibili.com") > -1) {
               if (DEBUGMODE){
                 console.log(`url changed to ${currentUrl}`);
               }
-              incremet();
+              increment();
               lastUrl = currentUrl;
             }
           }
-        }).observe(likeNum, {childList: true, subtree: true});
+        }).observe(coinNum, {childList: true, subtree: true, characterData: true});
       }
     })();
 }
