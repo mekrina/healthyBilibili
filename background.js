@@ -1,14 +1,29 @@
 DEBUGMODE = true;
-let maxVideoCount = -1; // 最大视频观看数
-let videoCount = 0;    // 当前观看视频数
-let sessionStart = null; // 当前会话的开始时间
+
+//执行初始化操作
+chrome.runtime.onStartup.addListener(() => {
+  chrome.storage.local.set({ 'maxVideoCount': -1 , 'videoCount': 0 , 'sessionStart': null })
+});
+let maxVideoCount,videoCount;
+
+function getStorageItems(keys) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(keys, (data) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
+const data = await getStorageItems(['maxVideoCount','videoCount']);
+maxVideoCount = data.maxVideoCount || -1;
+videoCount = data.videoCount || 0;
+
 if (DEBUGMODE) {
   console.log("background.js reloaded");
 }
-// 初始化监听器
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("Bilibili Watch Control extension installed.");
-});
 
 // 监听来自 content.js 的消息
 chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
@@ -16,7 +31,7 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
     sendResponse({ "maxVideoCount": maxVideoCount, "videoCount": videoCount });
   }
   else if (message.type === "startSession") {
-    sessionStart = Date.now();
+    chrome.storage.set('sessionStart',Date.now());
     if (DEBUGMODE) {
       console.log("Session started");
     }
@@ -26,6 +41,7 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
     if(videoCount < maxVideoCount)
     { 
       videoCount++;
+      chrome.storage.set({'videoCount':videoCount})
     }
     if (DEBUGMODE) {
       console.log("increment signal received");
@@ -33,6 +49,7 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
   }
   else if (message.type === "updateMaxVideoCount") {
     maxVideoCount = message.newMax;
+    chrome.storage.set({'maxVideoCount':maxVideoCount});
     if (DEBUGMODE) {
       console.log("maxVideoCount updated to " + maxVideoCount);
     }
@@ -59,10 +76,11 @@ function checkVideoLimit() {
 }
 
 // 定时任务：检查是否超过30分钟
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async () => {
+  let sessionStart = await getStorageItems('sessionStart').sessionStart;
   if (alarm.name === "checkSessionTime") {
     if (sessionStart && Date.now() - sessionStart > 30 * 60 * 1000) {
-      sessionStart = Date.now();
+      chrome.storage.set({'sessionStart:': Date.now()});
       // TODO: 弹出提醒
       alert("You have watched for 30 minutes, please take a break.");
     }
@@ -70,4 +88,4 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 // 定期检查的定时器
-chrome.alarms.create("checkSessionTime", { delayInMinutes: 1, periodInMinutes: 1 });
+chrome.alarms.create("checkSessionTime", { delayInMinutes: 11, periodInMinutes: 11 });
