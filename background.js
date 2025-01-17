@@ -17,7 +17,11 @@ function getStorageItems(keys) {
     });
   });
 }
-const data = await getStorageItems(['maxVideoCount','videoCount']);
+async function getValue(keys){
+  const data = await getStorageItems(keys);
+  return data;
+}
+let data = getValue(['maxVideoCount','videoCount']);
 maxVideoCount = data.maxVideoCount || -1;
 videoCount = data.videoCount || 0;
 
@@ -31,7 +35,7 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
     sendResponse({ "maxVideoCount": maxVideoCount, "videoCount": videoCount });
   }
   else if (message.type === "startSession") {
-    chrome.storage.set('sessionStart',Date.now());
+    chrome.storage.local.set('sessionStart',Date.now());
     if (DEBUGMODE) {
       console.log("Session started");
     }
@@ -41,7 +45,7 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
     if(videoCount < maxVideoCount)
     { 
       videoCount++;
-      chrome.storage.set({'videoCount':videoCount})
+      chrome.storage.local.set({'videoCount':videoCount})
     }
     if (DEBUGMODE) {
       console.log("increment signal received");
@@ -49,7 +53,7 @@ chrome.runtime.onMessage.addListener((message,sender, sendResponse) => {
   }
   else if (message.type === "updateMaxVideoCount") {
     maxVideoCount = message.newMax;
-    chrome.storage.set({'maxVideoCount':maxVideoCount});
+    chrome.storage.local.set({'maxVideoCount':maxVideoCount});
     if (DEBUGMODE) {
       console.log("maxVideoCount updated to " + maxVideoCount);
     }
@@ -77,10 +81,10 @@ function checkVideoLimit() {
 
 // 定时任务：检查是否超过30分钟
 chrome.alarms.onAlarm.addListener(async () => {
-  let sessionStart = await getStorageItems('sessionStart').sessionStart;
+  let sessionStart = getValue('sessionStart').sessionStart;
   if (alarm.name === "checkSessionTime") {
     if (sessionStart && Date.now() - sessionStart > 30 * 60 * 1000) {
-      chrome.storage.set({'sessionStart:': Date.now()});
+      chrome.storage.local.set({'sessionStart:': Date.now()});
       // TODO: 弹出提醒
       alert("You have watched for 30 minutes, please take a break.");
     }
